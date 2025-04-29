@@ -8,6 +8,13 @@ cloudinary.config({
 });
 
 
+const getCloudinaryPublicId = (url) => {
+    const parts = url.split("/");
+    const filename = parts[parts.length - 1];
+    return filename.split(".")[0];
+  };
+
+
 
 const uploadOnCloudinary = async (localFilePath) => {
     try {
@@ -27,4 +34,15 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-export { uploadOnCloudinary }
+const deleteFromCloudinary = async (publicId) => {
+    try {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: "auto",
+      });
+      return result;
+    } catch (error) {
+      return null;
+    }
+  };
+
+export { uploadOnCloudinary,deleteFromCloudinary,getCloudinaryPublicId }
