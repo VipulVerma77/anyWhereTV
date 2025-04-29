@@ -10,8 +10,7 @@ import { deleteFromCloudinary, getCloudinaryPublicId, uploadOnCloudinary } from 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
 
-  // Debug: Log incoming query params
-  console.log("Request query:", req.query);
+  
 
   const match = {};
   
@@ -25,15 +24,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
   if (userId) {
     try {
       match.owner = new mongoose.Types.ObjectId(userId);
-      console.log("Filtering by owner:", match.owner);
     } catch (err) {
-      console.error("Invalid userId format:", userId);
       return res.status(400).json(new ApiResponse(400, null, "Invalid userId format"));
     }
   }
 
-  // Debug: Check match criteria
-  console.log("Final match criteria:", match);
 
   const aggregate = [
     { $match: match },
@@ -70,8 +65,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
   ];
 
   // Debug: Check raw aggregation results
-  const rawResults = await Video.aggregate(aggregate);
-  console.log("Raw aggregation results:", rawResults);
+  // const rawResults = await Video.aggregate(aggregate);
+  // console.log("Raw aggregation results:", rawResults);
 
   const options = {
     page: parseInt(page, 10),
@@ -81,14 +76,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   const videos = await Video.aggregatePaginate(aggregate, options);
 
-  // Debug: Check final paginated results
-  console.log("Paginated results:", videos);
 
   res.status(200)
     .json(new ApiResponse(200, videos, "All Videos Fetched Successfully"));
 });
-
-
 
 const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description, duration } = req.body;
