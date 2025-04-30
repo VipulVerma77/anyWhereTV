@@ -9,9 +9,7 @@ import { deleteFromCloudinary, getCloudinaryPublicId, uploadOnCloudinary } from 
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy = 'createdAt', sortType = 'desc', userId } = req.query;
-
   
-
   const match = {};
   
   if (query) {
@@ -64,9 +62,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
   ];
 
-  // Debug: Check raw aggregation results
-  // const rawResults = await Video.aggregate(aggregate);
-  // console.log("Raw aggregation results:", rawResults);
 
   const options = {
     page: parseInt(page, 10),
@@ -84,12 +79,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
 const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description, duration } = req.body;
   
-  // Validate required fields
+
   if (!title || !description || !duration) {
     throw new ApiError(400, !title ? "Title is missing" : !duration ? "Duration is missing" : "Description is missing");
   }
 
-  // Get file paths
   const videoLocalPath = req.files?.videoFile?.[0]?.path;
   const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
   
@@ -97,7 +91,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, !videoLocalPath ? "Video file is missing" : "Thumbnail is missing");
   }
 
-  // Upload to Cloudinary
   const video = await uploadOnCloudinary(videoLocalPath);
   const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
@@ -105,18 +98,17 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, !video ? "Video file upload failed" : "Thumbnail upload failed");
   }
 
-  // Create video with owner
   const newVideo = await Video.create({
     title,
     description,
     duration: parseInt(duration),
     videoFile: video.url,
     thumbnail: thumbnail.url,
-    owner: req.user._id  // THIS IS THE CRITICAL LINE YOU'RE MISSING
+    owner: req.user._id  
   });
 
   const createdVideo = await Video.findById(newVideo._id)
-    .populate('owner', 'username avatar');  // Optional: populate owner info
+    .populate('owner', 'username avatar');  
 
   if (!createdVideo) {
     throw new ApiError(500, "Something went wrong while uploading video");
